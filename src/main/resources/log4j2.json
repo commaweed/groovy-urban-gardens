@@ -1,0 +1,97 @@
+{
+	"configuration": {
+		"name": "urban-gardens-log-config",
+		"status": "trace",
+		"dest": "${env:CATALINA_HOME}/logs/log4j_configuration_helper.log",
+		"verbose": true,
+		"properties": {
+			"property": [
+				{ "name": "tomcatLogsDir", "value": "${env:CATALINA_HOME}/logs" },
+				{ "name": "archiveDir", "value": "${tomcatLogsDir}/archive" },
+				{ "name": "patternLayout", "value": "%d [%t] %-5p [%C.%M()] %m%n" },
+				{ "name": "ugDirName", "value": "ug" },
+				{ "name": "ugLogDir", "value": "${tomcatLogsDir}/${ugDirName}" },
+				{ "name": "ugArchiveDir", "value": "${archiveDir}/${ugDirName}" }
+			]
+		},
+		"appenders": {
+			"appender": [
+				{
+					"type": "RollingFile",
+					"name": "rootAppender",
+					"fileName": "${ugLogDir}/root.log",
+					"filePattern": "${ugArchiveDir}/$${date:yyyy-MM-dd}/root.log.%d{yyyy-MM-dd}.gz",
+					"immediateFlush": true,
+					"PatternLayout": { "pattern": "${patternLayout}" },
+					"Policies": {
+						"OnStartupTriggeringPolicy": {},
+						"TimeBasedTriggeringPolicy": { "interval": "1", "modulate": true }
+					},
+					"DefaultRolloverStrategy": {
+						"delete": {
+							"basePath": "${ugArchiveDir}",
+							"maxDepth": 1,
+							"IfLastModified": { "age": "7d" }
+						}
+					}
+				},
+				{
+					"type": "RollingFile",
+					"name": "ugAppender",
+					"fileName": "${ugLogDir}/ug-webapp.log",
+					"filePattern": "${ugArchiveDir}/$${date:yyyy-MM-dd}/ug-webapp.log.%d{yyyy-MM-dd}",
+					"immediateFlush": true,
+					"PatternLayout": { "pattern": "${patternLayout}" },
+					"Policies": {
+						"OnStartupTriggeringPolicy": {},
+						"TimeBasedTriggeringPolicy": { "interval": "1", "modulate": true }
+					},
+					"DefaultRolloverStrategy": {
+						"delete": {
+							"basePath": "${ugArchiveDir}",
+							"maxDepth": 1,
+							"IfLastModified": { "age": "7d" }
+						}
+					}
+				},
+				{
+					"type": "Console",
+					"name": "stdout",
+					"PatternLayout": { "pattern": "${patternLayout}" }
+				}
+			]
+		},
+		"loggers": {
+			"root": {
+				"level": "debug",
+				"appender-ref": { "ref": "rootAppender" }
+			},
+			"logger": [
+				{
+					"name": "tjjenk2",
+					"level": "debug",
+					"additivity": false,
+					"appender-ref": { "ref": "ugAppender" }
+				},
+				{
+					"name": "urban.gardens",
+					"level": "debug",
+					"additivity": false,
+					"appender-ref": { "ref": "ugAppender" }
+				},
+				{
+					"name": "org.apache",
+					"level": "info",
+					"additivity": false,
+					"appender-ref": { "ref": "ugAppender" }
+				},
+				{
+					"name": "org.springframework",
+					"level": "info",
+					"additivity": false,
+					"appender-ref": { "ref": "ugAppender" }
+				}
+			]
+		}
+	}
+}
